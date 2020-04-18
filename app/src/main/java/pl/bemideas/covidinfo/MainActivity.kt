@@ -1,9 +1,16 @@
 package pl.bemideas.covidinfo
 
+import android.app.AlertDialog
+import android.app.Service
+import android.content.Context
+import android.content.DialogInterface
+import android.net.ConnectivityManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
@@ -17,9 +24,21 @@ class MainActivity : AppCompatActivity() {
 
         posts_recyclerview.layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
 
-        fetchStatistics()
-        fetchArticles()
+        if (!isConnected){
+            val dialog = AlertDialog.Builder(this)
+            dialog.setTitle("Ups!")
+            dialog.setMessage("Nie mogę załadować nowych danych! Upewnij się, że masz połączenie z internetem i odśwież dane.")
+            dialog.show()
+        } else {
+            fetchStatistics()
+            fetchArticles()
+        }
     }
+
+    private val Context.isConnected: Boolean
+        get() {
+            return (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo?.isConnected == true
+        }
 
     private fun fetchArticles() {
         println("Fetching Articles...")
@@ -81,7 +100,11 @@ class MainActivity : AppCompatActivity() {
 }
 
 //COVID Data
-class CovidData(val deaths: Int, val recovered: Int, val active: Int, val critical: Int)
+@Entity(tableName = "statystyki")
+class CovidData(val deaths: Int, val recovered: Int, val active: Int, val critical: Int){
+    @PrimaryKey(autoGenerate = false)
+    var id: Int = 0
+}
 
 //Gov Articles
 class Data(val data: Collection)

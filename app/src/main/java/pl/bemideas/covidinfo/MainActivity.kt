@@ -1,10 +1,10 @@
 package pl.bemideas.covidinfo
 
 import android.app.AlertDialog
-import android.app.Service
 import android.content.Context
-import android.content.DialogInterface
+import android.content.Intent
 import android.net.ConnectivityManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
 
         posts_recyclerview.layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
 
+
         if (!isConnected){
             val dialog = AlertDialog.Builder(this)
             dialog.setTitle("Ups!")
@@ -32,6 +33,17 @@ class MainActivity : AppCompatActivity() {
         } else {
             fetchStatistics()
             fetchArticles()
+        }
+
+        morePosts.setOnClickListener {
+            val govURL = Intent(android.content.Intent.ACTION_VIEW)
+            govURL.data = Uri.parse("https://www.gov.pl/web/koronawirus")
+            startActivity(govURL)
+        }
+        moreStats.setOnClickListener {
+            val statsURL = Intent(android.content.Intent.ACTION_VIEW)
+            statsURL.data = Uri.parse("https://www.worldometers.info/coronavirus/")
+            startActivity(statsURL)
         }
     }
 

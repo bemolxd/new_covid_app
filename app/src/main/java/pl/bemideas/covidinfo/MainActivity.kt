@@ -7,6 +7,8 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Entity
@@ -24,15 +26,13 @@ class MainActivity : AppCompatActivity() {
 
         posts_recyclerview.layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
 
+        initFetching()
 
-        if (!isConnected){
-            val dialog = AlertDialog.Builder(this)
-            dialog.setTitle("Ups!")
-            dialog.setMessage("Nie mogę załadować nowych danych! Upewnij się, że masz połączenie z internetem i odśwież dane.")
-            dialog.show()
-        } else {
-            fetchStatistics()
-            fetchArticles()
+        swipe_layout.setOnRefreshListener {
+            initFetching()
+            Handler().postDelayed(Runnable {
+                swipe_layout.isRefreshing = false
+            }, 1500)
         }
 
         morePosts.setOnClickListener {
@@ -44,6 +44,19 @@ class MainActivity : AppCompatActivity() {
             val statsURL = Intent(android.content.Intent.ACTION_VIEW)
             statsURL.data = Uri.parse("https://www.worldometers.info/coronavirus/")
             startActivity(statsURL)
+        }
+    }
+
+    private fun initFetching() {
+        if (!isConnected){
+            val dialog = AlertDialog.Builder(this)
+            dialog.setTitle("Ups!")
+            dialog.setMessage("Nie mogę załadować nowych danych! Upewnij się, że masz połączenie z internetem i odśwież dane.")
+            dialog.show()
+        } else {
+            Toast.makeText(this, "Odświeżam dane...", Toast.LENGTH_SHORT).show()
+            fetchStatistics()
+            fetchArticles()
         }
     }
 
